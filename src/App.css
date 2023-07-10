@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 32px;
 }
 
 .App-logo {
@@ -35,4 +36,27 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.latest {
+  margin-bottom: 16px;
+}
+
+.input-container {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+input {
+  max-width: 50vw;
+  min-width: 500px;
+  height: 30px;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
 }

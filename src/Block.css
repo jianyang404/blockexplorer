@@ -1,0 +1,22 @@
+.block {
+  padding: 16px 0;
+}
+
+.details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.label {
+  flex: 0 0 40%;
+  font-weight: 600;
+  text-align: right;
+}
+
+.value {
+  flex: 0 1 60%;
+
+  text-align: left;
+  margin-left: 16px;
+}
