@@ -1,0 +1,60 @@
+.dropdown {
+  position: relative;
+  height: 30px;
+}
+
+.selected {
+  display: flex;
+  align-items: center;
+}
+
+.arrow {
+  width: 4px;
+  height: 4px;
+  border: solid black;
+  margin-left: 16px;
+  cursor: pointer;
+  border-width: 2px 2px 0 0;
+  z-index: 99;
+}
+
+.up {
+  transition: all 0.2s;
+  transform: rotate(-45deg);
+}
+
+.down {
+  transition: all 0.2s;
+  transform: rotate(135deg);
+}
+
+.options {
+  max-height: 30vh;
+  overflow: scroll;
+  position: absolute;
+  top: 30px;
+  border: solid #e5e2e2;
+  border-width: 0.5px 1px;
+  border-radius: 5px;
+}
+.option {
+  position: relative;
+  padding: 12px 8px;
+  border: solid #e5e2e2;
+  border-width: 0.5px 0;
+  z-index: 999;
+  background: white;
+}
+
+.option:hover {
+  cursor: pointer;
+  background: #e5e2e2;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}

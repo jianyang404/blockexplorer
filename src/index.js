@@ -7,14 +7,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "*",
     element: <App />,
+    children: [
+      { path: "block/:blockId", element: <App /> },
+      { path: "transaction/:transactionId", element: <App /> },
+    ],
   },
-  {
-    path: "/block/:blockId",
-    element: <App />,
-  },
-  { path: "/transaction/:transactionId", element: <App /> },
 ]);
 
 ReactDOM.render(

@@ -1,8 +1,9 @@
 import { Alchemy, Network } from "alchemy-sdk";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Block from "./Block";
-import Loader from "./components/Loader/Loader";
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
+import Block from "./pages/Block";
+import Transaction from "./pages/Transaction";
+import { AlchemyContext } from "./context/AlchemyContext";
 
 import "./App.css";
 
@@ -22,81 +23,47 @@ const settings = {
 const alchemy = new Alchemy(settings);
 
 const App = () => {
-  const { blockId } = useParams();
-
+  const { pathname } = useLocation();
   const [latestBlockNumber, setLatestBlockNumber] = useState();
   const [blockNumber, setBlockNumber] = useState("");
-  const [block, setBlock] = useState({});
-  const [isLoadingBlock, setIsLoadingBlock] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setBlock({});
+    const getBlockNumber = async () => {
+      const latest = await alchemy.core.getBlockNumber();
 
-    async function getBlockNumber() {
-      setLatestBlockNumber(await alchemy.core.getBlockNumber());
-    }
-    async function getBlock() {
-      setBlockNumber(blockId);
+      if (latest && !pathname.includes("transaction")) {
+        setLatestBlockNumber(latest);
+        setBlockNumber(latest);
 
-      setIsLoadingBlock(true);
-      const block = await alchemy.core.getBlockWithTransactions(
-        blockId.startsWith("0x") ? blockId : +blockId
-      );
-
-      setBlock(block);
-      setIsLoadingBlock(false);
-    }
+        navigate(`/block/${latest}`);
+      }
+    };
 
     getBlockNumber();
-    if (blockId) getBlock();
-  }, [blockId]);
-
-  const handleChange = async (evt) => {
-    evt.preventDefault();
-
-    setErrorMessage("");
-    setBlockNumber(evt.target.value);
-
-    if (!evt.target.value) return setBlock({});
-
-    try {
-      if (Number.isNaN(+evt.target.value))
-        throw new Error("block number or hash only");
-
-      setIsLoadingBlock(true);
-      const block = await alchemy.core.getBlockWithTransactions(
-        evt.target.value.startsWith("0x") ? evt.target.value : +evt.target.value
-      );
-
-      setBlock(block);
-      setIsLoadingBlock(false);
-    } catch (err) {
-      console.log(err);
-
-      setErrorMessage(err.reason || err.message);
-    }
-  };
+  }, [navigate, pathname]);
 
   return (
-    <div className="App">
-      <h1>Block Explorer</h1>
+    <AlchemyContext.Provider value={alchemy}>
+      <div className="App">
+        <h1>Blockchain Explorer</h1>
 
-      <div className="latest">Latest Block Number: {latestBlockNumber}</div>
+        <div className="latest">Latest Block Number: {latestBlockNumber}</div>
 
-      <div className="input-container">
-        <input
-          placeholder="Input block number or hash..."
-          value={blockNumber}
-          onChange={handleChange}
-        />
-        {blockNumber && errorMessage && (
-          <span className="error">{errorMessage}</span>
-        )}
+        <Routes>
+          <Route
+            path="block/:blockId"
+            element={
+              <Block
+                blockNumber={blockNumber}
+                setBlockNumber={setBlockNumber}
+              />
+            }
+          />
+          <Route path="transaction/:transactionId" element={<Transaction />} />
+        </Routes>
       </div>
-
-      {isLoadingBlock ? <Loader /> : <Block block={block} />}
-    </div>
+    </AlchemyContext.Provider>
   );
 };
 
