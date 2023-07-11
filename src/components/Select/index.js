@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import "./Select.css";
 
 const Select = ({ options }) => {
-  const [selected, setSelected] = useState(options[0].hash);
+  const [selected, setSelected] = useState(options[0]?.hash || "");
   const [showOptions, toggleOptions] = useState(false);
 
-  const handleDropdown = (evt) => {
+  const handleDropdown = () => {
     toggleOptions(!showOptions);
   };
 

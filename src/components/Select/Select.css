@@ -6,6 +6,7 @@
 .selected {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .arrow {
@@ -13,7 +14,6 @@
   height: 4px;
   border: solid black;
   margin-left: 16px;
-  cursor: pointer;
   border-width: 2px 2px 0 0;
   z-index: 99;
 }
@@ -36,7 +36,9 @@
   border: solid #e5e2e2;
   border-width: 0.5px 1px;
   border-radius: 5px;
+  z-index: 99;
 }
+
 .option {
   position: relative;
   padding: 12px 8px;

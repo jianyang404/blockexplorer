@@ -1,0 +1,16 @@
+.tab-name {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.tab {
+  cursor: pointer;
+  margin: 0 8px;
+  padding: 8px;
+  font-weight: 600;
+}
+
+.active {
+  border-bottom: 2px solid black;
+}

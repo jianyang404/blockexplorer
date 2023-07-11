@@ -9,10 +9,6 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <App />,
-    children: [
-      { path: "block/:blockId", element: <App /> },
-      { path: "transaction/:transactionId", element: <App /> },
-    ],
   },
 ]);
 

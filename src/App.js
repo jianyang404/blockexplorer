@@ -1,8 +1,10 @@
 import { Alchemy, Network } from "alchemy-sdk";
 import { useEffect, useState } from "react";
 import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
+import Account from "./pages/Account";
 import Block from "./pages/Block";
 import Transaction from "./pages/Transaction";
+import Tab from "./components/Tab";
 import { AlchemyContext } from "./context/AlchemyContext";
 
 import "./App.css";
@@ -32,7 +34,7 @@ const App = () => {
     const getBlockNumber = async () => {
       const latest = await alchemy.core.getBlockNumber();
 
-      if (latest && !pathname.includes("transaction")) {
+      if (latest && pathname === "/") {
         setLatestBlockNumber(latest);
         setBlockNumber(latest);
 
@@ -50,18 +52,24 @@ const App = () => {
 
         <div className="latest">Latest Block Number: {latestBlockNumber}</div>
 
-        <Routes>
-          <Route
-            path="block/:blockId"
-            element={
-              <Block
-                blockNumber={blockNumber}
-                setBlockNumber={setBlockNumber}
-              />
-            }
-          />
-          <Route path="transaction/:transactionId" element={<Transaction />} />
-        </Routes>
+        <Tab group={["Block", "Transaction", "Account"]}>
+          <Routes>
+            <Route
+              path="block/:blockId?"
+              element={
+                <Block
+                  blockNumber={blockNumber}
+                  setBlockNumber={setBlockNumber}
+                />
+              }
+            />
+            <Route
+              path="transaction/:transactionId"
+              element={<Transaction />}
+            />
+            <Route path="account/:accountId" element={<Account />} />
+          </Routes>
+        </Tab>
       </div>
     </AlchemyContext.Provider>
   );

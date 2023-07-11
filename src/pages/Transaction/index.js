@@ -37,7 +37,6 @@ const Transaction = () => {
 
   return (
     <div>
-      <h3>Transaction Receipt</h3>
       {isLoadingTransaction ? (
         <Loader />
       ) : (

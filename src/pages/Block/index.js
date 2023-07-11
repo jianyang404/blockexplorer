@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import List from "../../components/List";
 import Select from "../../components/Select";
 import Loader from "../../components/Loader";
@@ -9,6 +9,7 @@ import "./Block.css";
 
 const Block = ({ blockNumber, setBlockNumber }) => {
   const alchemy = useContext(AlchemyContext);
+  const navigate = useNavigate();
 
   const { blockId } = useParams();
   const [isLoadingBlock, setIsLoadingBlock] = useState(false);
@@ -17,6 +18,8 @@ const Block = ({ blockNumber, setBlockNumber }) => {
 
   useEffect(() => {
     setBlock({});
+
+    let debounce;
 
     const getBlock = async () => {
       try {
@@ -42,8 +45,14 @@ const Block = ({ blockNumber, setBlockNumber }) => {
       }
     };
 
-    if (blockId) getBlock();
-  }, [alchemy.core, blockId, setBlockNumber]);
+    if (blockId) {
+      debounce = setTimeout(getBlock, 500);
+    }
+
+    if (blockNumber) navigate(`/block/${blockNumber}`);
+
+    return () => clearTimeout(debounce);
+  }, [alchemy.core, blockId, setBlockNumber, blockNumber, navigate]);
 
   const handleChange = async (evt) => {
     evt.preventDefault();
@@ -53,29 +62,31 @@ const Block = ({ blockNumber, setBlockNumber }) => {
 
     if (!evt.target.value) return setBlock({});
 
-    try {
-      if (Number.isNaN(+evt.target.value))
-        throw new Error("block number or hash only");
+    navigate(`/block/${evt.target.value}`);
 
-      setIsLoadingBlock(true);
+    // try {
+    //   if (Number.isNaN(+evt.target.value))
+    //     throw new Error("block number or hash only");
 
-      const block = await alchemy.core.getBlockWithTransactions(
-        evt.target.value.startsWith("0x") ? evt.target.value : +evt.target.value
-      );
+    //   setIsLoadingBlock(true);
 
-      setIsLoadingBlock(false);
+    //   const block = await alchemy.core.getBlockWithTransactions(
+    //     evt.target.value.startsWith("0x") ? evt.target.value : +evt.target.value
+    //   );
 
-      if (block) {
-        setBlock(block);
-      } else {
-        setBlock({});
-        throw new Error("block does not exist");
-      }
-    } catch (err) {
-      console.log(err);
+    //   setIsLoadingBlock(false);
 
-      setErrorMessage(err.reason || err.message);
-    }
+    //   if (block) {
+    //     setBlock(block);
+    //   } else {
+    //     setBlock({});
+    //     throw new Error("block does not exist");
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+
+    //   setErrorMessage(err.reason || err.message);
+    // }
   };
 
   return (
