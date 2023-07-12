@@ -3,9 +3,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import List from "../../components/List";
 import Select from "../../components/Select";
 import Loader from "../../components/Loader";
+import Input from "../../components/Input";
 import { AlchemyContext } from "../../context/AlchemyContext";
 import { BigNumber } from "alchemy-sdk";
-import "./Block.css";
+import styles from "./Block.module.css";
 
 const Block = ({ blockNumber, setBlockNumber }) => {
   const alchemy = useContext(AlchemyContext);
@@ -17,8 +18,6 @@ const Block = ({ blockNumber, setBlockNumber }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    setBlock({});
-
     let debounce;
 
     const getBlock = async () => {
@@ -26,11 +25,12 @@ const Block = ({ blockNumber, setBlockNumber }) => {
         setBlockNumber(blockId);
         setIsLoadingBlock(true);
 
+        if (Number.isNaN(+blockId))
+          throw new Error("block number or hash only");
+
         const block = await alchemy.core.getBlockWithTransactions(
           blockId.startsWith("0x") ? blockId : +blockId
         );
-
-        setIsLoadingBlock(false);
 
         if (block) {
           setBlock(block);
@@ -42,13 +42,12 @@ const Block = ({ blockNumber, setBlockNumber }) => {
         console.log(err);
 
         setErrorMessage(err.reason || err.message);
+      } finally {
+        setIsLoadingBlock(false);
       }
     };
 
-    if (blockId) {
-      debounce = setTimeout(getBlock, 500);
-    }
-
+    if (blockId) debounce = setTimeout(getBlock, 500);
     if (blockNumber) navigate(`/block/${blockNumber}`);
 
     return () => clearTimeout(debounce);
@@ -60,51 +59,24 @@ const Block = ({ blockNumber, setBlockNumber }) => {
     setErrorMessage("");
     setBlockNumber(evt.target.value);
 
-    if (!evt.target.value) return setBlock({});
-
     navigate(`/block/${evt.target.value}`);
 
-    // try {
-    //   if (Number.isNaN(+evt.target.value))
-    //     throw new Error("block number or hash only");
-
-    //   setIsLoadingBlock(true);
-
-    //   const block = await alchemy.core.getBlockWithTransactions(
-    //     evt.target.value.startsWith("0x") ? evt.target.value : +evt.target.value
-    //   );
-
-    //   setIsLoadingBlock(false);
-
-    //   if (block) {
-    //     setBlock(block);
-    //   } else {
-    //     setBlock({});
-    //     throw new Error("block does not exist");
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-
-    //   setErrorMessage(err.reason || err.message);
-    // }
+    if (!evt.target.value) return setBlock({});
   };
 
   return (
     <>
-      <div className="input-container">
-        <input
-          placeholder="Input block number or hash..."
-          value={blockNumber}
-          onChange={handleChange}
-        />
-        {blockNumber && errorMessage && (
-          <span className="error">{errorMessage}</span>
-        )}
-      </div>
+      <Input
+        value={blockNumber}
+        onChange={handleChange}
+        placeholder="Input block number or hash..."
+        errorMessage={blockNumber ? errorMessage : null}
+      />
+
       {isLoadingBlock ? (
         <Loader />
       ) : (
-        <div className="block">
+        <div className={styles.block}>
           {Object.entries(block).map(([key, value]) => {
             // Has to go first or else React elements will get converted
             if (value instanceof BigNumber) value = parseInt(value, 10);

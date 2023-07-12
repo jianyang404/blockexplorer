@@ -7,7 +7,7 @@ import Transaction from "./pages/Transaction";
 import Tab from "./components/Tab";
 import { AlchemyContext } from "./context/AlchemyContext";
 
-import "./App.css";
+import styles from "./App.module.css";
 
 // Refer to the README doc for more information about using API
 // keys in client-side code. You should never do this in production
@@ -31,10 +31,12 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let debounce;
+
     const getBlockNumber = async () => {
       const latest = await alchemy.core.getBlockNumber();
 
-      if (latest && pathname === "/") {
+      if (latest && !blockNumber) {
         setLatestBlockNumber(latest);
         setBlockNumber(latest);
 
@@ -42,15 +44,19 @@ const App = () => {
       }
     };
 
-    getBlockNumber();
-  }, [navigate, pathname]);
+    setTimeout(getBlockNumber, 500);
+
+    return () => clearTimeout(debounce);
+  }, [navigate, pathname, blockNumber]);
 
   return (
     <AlchemyContext.Provider value={alchemy}>
-      <div className="App">
+      <div className={styles.App}>
         <h1>Blockchain Explorer</h1>
 
-        <div className="latest">Latest Block Number: {latestBlockNumber}</div>
+        <div className={styles.latest}>
+          Latest Block Number: {latestBlockNumber}
+        </div>
 
         <Tab group={["Block", "Transaction", "Account"]}>
           <Routes>
@@ -64,10 +70,10 @@ const App = () => {
               }
             />
             <Route
-              path="transaction/:transactionId"
+              path="transaction/:transactionId?"
               element={<Transaction />}
             />
-            <Route path="account/:accountId" element={<Account />} />
+            <Route path="account/:accountId?" element={<Account />} />
           </Routes>
         </Tab>
       </div>

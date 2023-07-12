@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./Tab.css";
+import styles from "./Tab.module.css";
 
 const Tab = ({ group, children }) => {
   const { pathname } = useLocation();
@@ -9,7 +9,6 @@ const Tab = ({ group, children }) => {
 
   useEffect(() => {
     group.forEach((el) => {
-      console.log(pathname, el);
       if (pathname.toLowerCase().includes(el.toLowerCase())) setSelected(el);
     });
   }, [group, pathname]);
@@ -22,18 +21,18 @@ const Tab = ({ group, children }) => {
 
   return (
     <div>
-      <div className="tab-name">
+      <div className={styles["tab-name"]}>
         {group.map((el) => (
           <div
             key={el}
             onClick={handleClick}
-            className={`tab ${selected === el ? "active" : ""}`}
+            className={`${styles.tab} ${selected === el ? styles.active : ""}`}
           >
             {el}
           </div>
         ))}
       </div>
-      <div className="tab-content">{children}</div>
+      <div className={styles["tab-content"]}>{children}</div>
     </div>
   );
 };
