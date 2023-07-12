@@ -26,8 +26,8 @@ const Transaction = ({
 
     const getTransaction = async () => {
       try {
-        setTransactionHash(transactionId);
         setIsLoadingTransaction(true);
+        setTransactionHash(transactionId);
 
         const result = await alchemy.core.getTransactionReceipt(transactionId);
 
@@ -38,14 +38,14 @@ const Transaction = ({
         }
       } catch (err) {
         console.log(err);
+
+        setErrorMessage(err.reason || err.message);
       } finally {
         setIsLoadingTransaction(false);
       }
     };
 
-    if (transactionId !== transactionHash)
-      debounce = setTimeout(getTransaction, 500);
-    if (transactionHash) navigate(`/transaction/${transactionHash}`);
+    if (transactionId) debounce = setTimeout(getTransaction, 500);
 
     return () => clearTimeout(debounce);
   }, [
@@ -60,19 +60,24 @@ const Transaction = ({
   const handleChange = (evt) => {
     evt.preventDefault();
 
-    setErrorMessage("");
+    setIsLoadingTransaction(true);
     setTransactionHash(evt.target.value);
+    setErrorMessage("");
 
     navigate(`/transaction/${evt.target.value}`);
 
-    if (!evt.target.value) dispatch({ type: "transaction", transaction: {} });
+    if (!evt.target.value) {
+      dispatch({ type: "transaction", transaction: {} });
+
+      setIsLoadingTransaction(false);
+    }
   };
 
   return (
     <>
       <Input
-        placeholder="Input transaction hash..."
         value={transactionHash}
+        placeholder="Input transaction hash..."
         onChange={handleChange}
         errorMessage={transactionHash && errorMessage}
       />
@@ -94,6 +99,12 @@ const Transaction = ({
 
             if (["blockHash", "blockNumber"].includes(key))
               value = <Link to={`/block/${value}`}>{value}</Link>;
+
+            if (
+              ["to", "from", "contractAddress"].includes(key) &&
+              value !== "null"
+            )
+              value = <Link to={`/account/${value}`}>{value}</Link>;
 
             if (key === "status") value = value ? "success" : "failure";
 

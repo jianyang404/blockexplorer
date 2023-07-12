@@ -1,11 +1,18 @@
 import { Alchemy, Network } from "alchemy-sdk";
 import { useEffect, useState, useReducer } from "react";
-import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  Routes,
+  Route,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import Account from "./pages/Account";
 import Block from "./pages/Block";
 import Transaction from "./pages/Transaction";
 import Tab from "./components/Tab";
 import { AlchemyContext } from "./context";
+import { EthereumLogo } from "./components/Logo";
 import styles from "./App.module.css";
 
 // Refer to the README doc for more information about using API
@@ -31,6 +38,9 @@ export const reducer = (state, action) => {
     case "transaction": {
       return { ...state, transaction: action.transaction };
     }
+    case "balance": {
+      return { ...state, balance: action.balance };
+    }
     default: {
       throw new Error(`Unknown type: ${action.type}`);
     }
@@ -43,8 +53,10 @@ const App = () => {
   const [blockNumber, setBlockNumber] = useState("");
   const [latestBlockNumber, setLatestBlockNumber] = useState();
   const [transactionHash, setTransactionHash] = useState("");
+  const [address, setAddress] = useState("");
 
-  const [{ block, transaction }, dispatch] = useReducer(reducer, {
+  const [{ balance, block, transaction }, dispatch] = useReducer(reducer, {
+    balance: "",
     block: {},
     transaction: {},
   });
@@ -53,28 +65,34 @@ const App = () => {
     let debounce;
 
     const getBlockNumber = async () => {
-      const latest = await alchemy.core.getBlockNumber();
-
-      if (latest && !blockNumber) {
+      try {
+        const latest = await alchemy.core.getBlockNumber();
         setLatestBlockNumber(latest);
-        setBlockNumber(latest);
-
-        navigate(`/block/${latest}`);
+      } catch (err) {
+        console.log(err);
       }
     };
 
-    setTimeout(getBlockNumber, 500);
+    if (!latestBlockNumber) {
+      setTimeout(getBlockNumber, 500);
+    }
 
     return () => clearTimeout(debounce);
-  }, [navigate, pathname, blockNumber]);
+  }, [navigate, pathname, blockNumber, latestBlockNumber]);
 
   return (
     <AlchemyContext.Provider value={alchemy}>
       <div className={styles.App}>
-        <h1>Blockchain Explorer</h1>
+        <div className={styles.header}>
+          <div className={styles.logo}>
+            <EthereumLogo />
+          </div>
+          <h1>Ethereum Explorer</h1>
+        </div>
 
         <div className={styles.latest}>
-          Latest Block Number: {latestBlockNumber}
+          Latest Block Number:{" "}
+          <Link to={`/block/${latestBlockNumber}`}>{latestBlockNumber}</Link>
         </div>
 
         <Tab group={["Block", "Transaction", "Account"]}>
@@ -101,7 +119,17 @@ const App = () => {
                 />
               }
             />
-            <Route path="account/:accountId?" element={<Account />} />
+            <Route
+              path="account/:accountId?"
+              element={
+                <Account
+                  dispatch={dispatch}
+                  balance={balance}
+                  address={address}
+                  setAddress={setAddress}
+                />
+              }
+            />
           </Routes>
         </Tab>
       </div>

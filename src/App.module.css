@@ -41,3 +41,13 @@
 .latest {
   margin-bottom: 16px;
 }
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 60px;
+}

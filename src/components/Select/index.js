@@ -31,16 +31,20 @@ const Select = ({ options }) => {
         />
       </div>
 
-      {showOptions && (
-        <div className={styles.options}>
-          {options.map((el) => (
-            <div key={el.hash} onClick={handleOption} className={styles.option}>
-              {el.hash}
-            </div>
-          ))}
+      <div
+        className={`${styles.options} ${
+          showOptions ? styles.show : styles.hide
+        }`}
+      >
+        {options.map((el) => (
+          <div key={el.hash} onClick={handleOption} className={styles.option}>
+            {el.hash}
+          </div>
+        ))}
+        {showOptions && (
           <div className={styles.overlay} onClick={handleClose} />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   ) : (
     "-"

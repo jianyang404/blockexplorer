@@ -22,8 +22,8 @@ const Block = ({ blockNumber, setBlockNumber, dispatch, block }) => {
 
     const getBlock = async () => {
       try {
-        setBlockNumber(blockId);
         setIsLoadingBlock(true);
+        setBlockNumber(blockId);
 
         if (Number.isNaN(+blockId))
           throw new Error("block number or hash only");
@@ -47,8 +47,7 @@ const Block = ({ blockNumber, setBlockNumber, dispatch, block }) => {
       }
     };
 
-    if (blockId !== blockNumber) debounce = setTimeout(getBlock, 500);
-    if (blockNumber) navigate(`/block/${blockNumber}`);
+    if (blockId) debounce = setTimeout(getBlock, 500);
 
     return () => clearTimeout(debounce);
   }, [alchemy.core, blockId, setBlockNumber, blockNumber, navigate, dispatch]);
@@ -56,12 +55,17 @@ const Block = ({ blockNumber, setBlockNumber, dispatch, block }) => {
   const handleChange = async (evt) => {
     evt.preventDefault();
 
-    setErrorMessage("");
+    setIsLoadingBlock(true);
     setBlockNumber(evt.target.value);
+    setErrorMessage("");
 
     navigate(`/block/${evt.target.value}`);
 
-    if (!evt.target.value) dispatch({ type: "block", block: {} });
+    if (!evt.target.value) {
+      dispatch({ type: "block", block: {} });
+
+      setIsLoadingBlock(false);
+    }
   };
 
   return (
@@ -89,6 +93,9 @@ const Block = ({ blockNumber, setBlockNumber, dispatch, block }) => {
 
             if (key === "parentHash")
               value = <Link to={`/block/${value}`}>{value}</Link>;
+
+            if (key === "miner")
+              value = <Link to={`/account/${value}`}>{value}</Link>;
 
             if (key === "_difficulty") return null;
 

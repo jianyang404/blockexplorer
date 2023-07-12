@@ -29,14 +29,27 @@
 }
 
 .options {
-  max-height: 30vh;
-  overflow: scroll;
   position: absolute;
   top: 30px;
   border: solid #e5e2e2;
   border-width: 0.5px 1px;
   border-radius: 5px;
+  box-shadow: 1px 1px 3px 2px #bebbbb;
   z-index: 99;
+}
+
+.hide {
+  border: none;
+  box-shadow: none;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.show {
+  height: 30vh;
+  overflow: scroll;
+  transition: all 0.4s;
 }
 
 .option {
