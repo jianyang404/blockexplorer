@@ -3,16 +3,19 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import List from "../../components/List";
 import Loader from "../../components/Loader";
 import Input from "../../components/Input";
-import { AlchemyContext } from "../../context/AlchemyContext";
+import { AlchemyContext } from "../../context";
 import { BigNumber } from "alchemy-sdk";
 import styles from "./Transaction.module.css";
 
-const Transaction = () => {
+const Transaction = ({
+  dispatch,
+  transaction,
+  transactionHash,
+  setTransactionHash,
+}) => {
   const navigate = useNavigate();
 
   const [isLoadingTransaction, setIsLoadingTransaction] = useState(false);
-  const [transaction, setTransaction] = useState({});
-  const [transactionHash, setTransactionHash] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const alchemy = useContext(AlchemyContext);
@@ -26,14 +29,12 @@ const Transaction = () => {
         setTransactionHash(transactionId);
         setIsLoadingTransaction(true);
 
-        const transaction = await alchemy.core.getTransactionReceipt(
-          transactionId
-        );
+        const result = await alchemy.core.getTransactionReceipt(transactionId);
 
-        if (transaction) {
-          setTransaction(transaction);
+        if (result) {
+          dispatch({ type: "transaction", transaction: result });
         } else {
-          setTransaction({});
+          dispatch({ type: "transaction", transaction: {} });
         }
       } catch (err) {
         console.log(err);
@@ -42,10 +43,19 @@ const Transaction = () => {
       }
     };
 
-    if (transactionId) debounce = setTimeout(getTransaction, 500);
+    if (transactionId !== transactionHash)
+      debounce = setTimeout(getTransaction, 500);
+    if (transactionHash) navigate(`/transaction/${transactionHash}`);
 
     return () => clearTimeout(debounce);
-  }, [alchemy.core, transactionId]);
+  }, [
+    alchemy.core,
+    dispatch,
+    navigate,
+    setTransactionHash,
+    transactionHash,
+    transactionId,
+  ]);
 
   const handleChange = (evt) => {
     evt.preventDefault();
@@ -54,7 +64,8 @@ const Transaction = () => {
     setTransactionHash(evt.target.value);
 
     navigate(`/transaction/${evt.target.value}`);
-    if (!evt.target.value) setTransaction({});
+
+    if (!evt.target.value) dispatch({ type: "transaction", transaction: {} });
   };
 
   return (

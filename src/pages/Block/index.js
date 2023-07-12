@@ -4,17 +4,17 @@ import List from "../../components/List";
 import Select from "../../components/Select";
 import Loader from "../../components/Loader";
 import Input from "../../components/Input";
-import { AlchemyContext } from "../../context/AlchemyContext";
+import { AlchemyContext } from "../../context";
 import { BigNumber } from "alchemy-sdk";
 import styles from "./Block.module.css";
 
-const Block = ({ blockNumber, setBlockNumber }) => {
+const Block = ({ blockNumber, setBlockNumber, dispatch, block }) => {
   const alchemy = useContext(AlchemyContext);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const { blockId } = useParams();
+
   const [isLoadingBlock, setIsLoadingBlock] = useState(false);
-  const [block, setBlock] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -28,14 +28,14 @@ const Block = ({ blockNumber, setBlockNumber }) => {
         if (Number.isNaN(+blockId))
           throw new Error("block number or hash only");
 
-        const block = await alchemy.core.getBlockWithTransactions(
+        const result = await alchemy.core.getBlockWithTransactions(
           blockId.startsWith("0x") ? blockId : +blockId
         );
 
-        if (block) {
-          setBlock(block);
+        if (result) {
+          dispatch({ type: "block", block: result });
         } else {
-          setBlock({});
+          dispatch({ type: "block", block: {} });
           throw new Error("block does not exist");
         }
       } catch (err) {
@@ -47,11 +47,11 @@ const Block = ({ blockNumber, setBlockNumber }) => {
       }
     };
 
-    if (blockId) debounce = setTimeout(getBlock, 500);
+    if (blockId !== blockNumber) debounce = setTimeout(getBlock, 500);
     if (blockNumber) navigate(`/block/${blockNumber}`);
 
     return () => clearTimeout(debounce);
-  }, [alchemy.core, blockId, setBlockNumber, blockNumber, navigate]);
+  }, [alchemy.core, blockId, setBlockNumber, blockNumber, navigate, dispatch]);
 
   const handleChange = async (evt) => {
     evt.preventDefault();
@@ -61,7 +61,7 @@ const Block = ({ blockNumber, setBlockNumber }) => {
 
     navigate(`/block/${evt.target.value}`);
 
-    if (!evt.target.value) return setBlock({});
+    if (!evt.target.value) dispatch({ type: "block", block: {} });
   };
 
   return (

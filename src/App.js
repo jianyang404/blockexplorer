@@ -1,12 +1,11 @@
 import { Alchemy, Network } from "alchemy-sdk";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import Account from "./pages/Account";
 import Block from "./pages/Block";
 import Transaction from "./pages/Transaction";
 import Tab from "./components/Tab";
-import { AlchemyContext } from "./context/AlchemyContext";
-
+import { AlchemyContext } from "./context";
 import styles from "./App.module.css";
 
 // Refer to the README doc for more information about using API
@@ -24,11 +23,31 @@ const settings = {
 //   https://docs.alchemy.com/reference/alchemy-sdk-api-surface-overview#api-surface
 const alchemy = new Alchemy(settings);
 
+export const reducer = (state, action) => {
+  switch (action.type) {
+    case "block": {
+      return { ...state, block: action.block };
+    }
+    case "transaction": {
+      return { ...state, transaction: action.transaction };
+    }
+    default: {
+      throw new Error(`Unknown type: ${action.type}`);
+    }
+  }
+};
+
 const App = () => {
-  const { pathname } = useLocation();
-  const [latestBlockNumber, setLatestBlockNumber] = useState();
-  const [blockNumber, setBlockNumber] = useState("");
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [blockNumber, setBlockNumber] = useState("");
+  const [latestBlockNumber, setLatestBlockNumber] = useState();
+  const [transactionHash, setTransactionHash] = useState("");
+
+  const [{ block, transaction }, dispatch] = useReducer(reducer, {
+    block: {},
+    transaction: {},
+  });
 
   useEffect(() => {
     let debounce;
@@ -64,6 +83,8 @@ const App = () => {
               path="block/:blockId?"
               element={
                 <Block
+                  dispatch={dispatch}
+                  block={block}
                   blockNumber={blockNumber}
                   setBlockNumber={setBlockNumber}
                 />
@@ -71,7 +92,14 @@ const App = () => {
             />
             <Route
               path="transaction/:transactionId?"
-              element={<Transaction />}
+              element={
+                <Transaction
+                  dispatch={dispatch}
+                  transaction={transaction}
+                  transactionHash={transactionHash}
+                  setTransactionHash={setTransactionHash}
+                />
+              }
             />
             <Route path="account/:accountId?" element={<Account />} />
           </Routes>

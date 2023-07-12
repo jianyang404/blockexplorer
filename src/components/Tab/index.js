@@ -20,7 +20,7 @@ const Tab = ({ group, children }) => {
   };
 
   return (
-    <div>
+    <>
       <div className={styles["tab-name"]}>
         {group.map((el) => (
           <div
@@ -33,7 +33,7 @@ const Tab = ({ group, children }) => {
         ))}
       </div>
       <div className={styles["tab-content"]}>{children}</div>
-    </div>
+    </>
   );
 };
 
